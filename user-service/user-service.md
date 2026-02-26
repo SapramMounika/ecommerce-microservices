@@ -12,6 +12,16 @@ The User Service is responsible for:
 
 This service is part of the E-Commerce Microservices Architecture and is registered with Eureka and accessible through API Gateway.
 
+## 🏗 Architecture Role
+
+User Service is part of a Microservices Architecture:
+
+Client → API Gateway → User Service → PostgreSQL
+
+- Registered with Eureka
+- Configuration managed via Config Server
+- Secured using Spring Security + JWT
+
 ---
 
 ## 2️⃣ Tech Stack
