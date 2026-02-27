@@ -35,7 +35,6 @@ Traditional session-based authentication:
 
 ## 3️. Authentication Flow (End-to-End)
 
-
 1. User sends login request (username + password)
 2. Service validates credentials
 3. JWT token is generated
