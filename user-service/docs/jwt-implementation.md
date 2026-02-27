@@ -35,6 +35,7 @@ Traditional session-based authentication:
 
 ## 3️. Authentication Flow (End-to-End)
 
+
 1. User sends login request (username + password)
 2. Service validates credentials
 3. JWT token is generated
@@ -67,6 +68,7 @@ Contains:
 }
 
 ---
+
 #### Payload
 
 Contains:
@@ -78,6 +80,7 @@ Contains:
   "iat": 1710000000,
   "exp": 1710003600
 }
+
 ```
 #### Fields:
 
