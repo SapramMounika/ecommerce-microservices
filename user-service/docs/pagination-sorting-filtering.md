@@ -225,20 +225,14 @@ Prevents malicious sorting.
 
 Flow:
 
-Client
+Client  
 → Controller  
-
-→ Service   
-
+→ Service  
 → Repository  
-
 → Database  
-
 → DTO Mapping  
-
 → PageResponse  
-
-→ Client
+→ Client 
 
 ## 8️. Database-Level Behavior
 
