@@ -1,6 +1,6 @@
 # 👤 User Service Documentation
 
-## **1**  Service Overview
+## 1.  Service Overview
 
 The User Service is a core microservice in the E-Commerce Microservices Architecture.
 
@@ -21,7 +21,7 @@ This service integrates with:
 ---
 
 
-## 🏗 Architecture Role
+## 2. 🏗 Architecture Role
 
 User Service is part of a Microservices Architecture:
 
@@ -33,7 +33,7 @@ Client → API Gateway → User Service → PostgreSQL
 
 ---
 
-## 2️⃣ Tech Stack
+## 3. Tech Stack
 
 - Java 17
 - Spring Boot
