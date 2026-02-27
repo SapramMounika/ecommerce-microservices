@@ -92,8 +92,8 @@ Spring automatically adds metadata like:
 
  ❌ Exposes Spring internal fields  
  
- ❌ Contains unnecessary metadata
-
+ ❌ Contains unnecessary metadata  
+ 
  ❌ Less clean API contract
 
 ### 🔹 B) Advanced Pagination (Production-Level)
