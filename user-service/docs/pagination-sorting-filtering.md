@@ -90,8 +90,10 @@ Spring automatically adds metadata like:
 
 #### Cons
 
- ❌ Exposes Spring internal fields
+ ❌ Exposes Spring internal fields  
+ 
  ❌ Contains unnecessary metadata
+
  ❌ Less clean API contract
 
 ### 🔹 B) Advanced Pagination (Production-Level)
@@ -108,12 +110,18 @@ GET /api/users/search
 
 This endpoint supports:
 
-✅ Pagination  
+✅ Pagination
+
 ✅ Sorting
+
 ✅ Filtering by username
+
 ✅ Filtering by role
+
 ✅ Max page size validation
+
 ✅ Allowed sort field validation
+
 ✅ Custom clean response format
 
 ## 4. API Parameters
