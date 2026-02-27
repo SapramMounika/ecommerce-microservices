@@ -66,8 +66,7 @@ Contains:
   "alg": "HS256",
   "typ": "JWT"
 }
-
----
+```
 
 #### Payload
 
