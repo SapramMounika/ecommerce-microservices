@@ -265,17 +265,11 @@ GlobalExceptionHandler ensures structured error responses.
 Client
 
 → API Gateway
-
 → JwtFilter
-
 → SecurityContext
-
 → Controller
-
 → Service
-
 → Repository
-
 → Database
 
 ## 14. Advantages of Current Implementation
@@ -296,7 +290,8 @@ Client
 
 ## 16. Summary
 
-- The JWT implementation provides:
+ The JWT implementation provides:
+ 
 - Secure authentication
 - Role-based authorization
 - Stateless architecture
