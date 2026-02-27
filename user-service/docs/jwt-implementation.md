@@ -263,14 +263,13 @@ GlobalExceptionHandler ensures structured error responses.
 ## 13. Architecture Flow Diagram
 
 Client  
-
 → API Gateway  
-→ JwtFilter
-→ SecurityContext
-→ Controller
-→ Service
-→ Repository
-→ Database
+→ JwtFilter  
+→ SecurityContext  
+→ Controller  
+→ Service  
+→ Repository  
+→ Database  
 
 ## 14. Advantages of Current Implementation
 
