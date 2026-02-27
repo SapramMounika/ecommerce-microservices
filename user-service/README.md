@@ -163,13 +163,13 @@ POST /api/auth/login
 ### 🔹 5.2 User CRUD APIs
 
 All endpoints require JWT authentication.
-
+```
 #### View All Users
 
 GET /api/users/viewAll
 
 Role: ADMIN, USER
-
+```
 #### View User By ID
 
 GET /api/users/viewById/{id}
