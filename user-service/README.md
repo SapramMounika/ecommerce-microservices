@@ -368,15 +368,23 @@ jwt.expiration=3600000
 
 ## 8️⃣ Architecture Flow
 
-Client
-→ API Gateway
-→ User Service Controller
-→ Service Layer
-→ Repository (Spring Data JPA)
-→ PostgreSQL
-→ DTO Mapping
-→ PageResponse Wrapper
-→ Client
+Client  
+↓  
+API Gateway  
+↓  
+User Service Controller  
+↓  
+Service Layer  
+↓  
+Repository (Spring Data JPA)  
+↓  
+PostgreSQL  
+↓  
+DTO Mapping  
+↓  
+PageResponse Wrapper  
+↓  
+Client  
 
 
 ## 🔟 Scalability Considerations
