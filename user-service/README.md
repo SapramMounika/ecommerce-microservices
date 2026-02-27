@@ -102,7 +102,7 @@ Client → API Gateway → User Service → PostgreSQL
 
 POST /api/auth/register
 
-Request:
+##### Request:
 
 ```json
 {
@@ -111,7 +111,7 @@ Request:
   "role": "ROLE_USER"
 }
 ```
-Response:
+##### Response:
 
 ### Success Response (201)
 
@@ -122,6 +122,7 @@ Response:
 ```
 
 ### Error Response (400)
+
 ```json
 {
   "timestamp": ".....",
@@ -133,7 +134,7 @@ Response:
 
 POST /api/auth/login
 
-Request:
+##### Request:
 
 ```json
 {
@@ -142,7 +143,7 @@ Request:
 }
 
 ```
-Success Response (200):
+### Success Response (200):
 
 ```json
 {
@@ -150,7 +151,7 @@ Success Response (200):
 }
 
 ```
-Error Response (401):
+### Error Response (401):
 
 ```json
 {
@@ -159,36 +160,41 @@ Error Response (401):
   "message": "Invalid credentials"
 }
 ```
-🔹 5.2 User CRUD APIs
+### 🔹 5.2 User CRUD APIs
 
 All endpoints require JWT authentication.
 
-View All Users
+#### View All Users
+
 GET /api/users/viewAll
 
 Role: ADMIN, USER
 
-View User By ID
+#### View User By ID
+
 GET /api/users/viewById/{id}
 
 Role: ADMIN, USER
 
-Create User
+#### Create User
+
 POST /api/users/add
 
 Role: ADMIN only
 
-Update User
+#### Update User
+
 PUT /api/users/update/{id}
 
 Role: ADMIN only
 
-Delete User
+#### Delete User
+
 DELETE /api/users/delete/{id}
 
 Role: ADMIN only
 
-Response:
+##### Response:
 
 ```json
 {
@@ -196,24 +202,24 @@ Response:
 }
 ```
 
-6️⃣ Pagination Implementation
+## 6️⃣ Pagination Implementation
 
 Two pagination strategies are implemented.
 
-🔹 6.1 Basic Pagination (Spring Default)
+#### 🔹 6.1 Basic Pagination (Spring Default)
 
 GET /api/users/paginated
 
 Returns Spring Page<> object.
 Used for internal or quick retrieval.
 
-Supports:
+#### Supports:
 
 Pagination
 
 Sorting
 
-Example:
+#### Example:
 
 GET /api/users/paginated?page=0&size=5&sortBy=username&direction=asc
 
@@ -229,11 +235,11 @@ first
 
 last
 
-🔹 6.2 Advanced Pagination (Production-Level)
+#### 🔹 6.2 Advanced Pagination (Production-Level)
 
 GET /api/users/search
 
-Supports:
+#### Supports:
 
 Pagination
 
@@ -249,7 +255,7 @@ Sort field validation
 
 Clean response wrapper
 
-Query Parameters:
+#### Query Parameters:
 
 | Parameter | Default | Description      |
 | --------- | ------- | ---------------- |
@@ -261,11 +267,12 @@ Query Parameters:
 | role      | null    | Role filter      |
 
 
-Example
+#### Example
 
 GET /api/users/search?page=0&size=5&sortBy=username&direction=asc&username=la&role=ROLE_USER
 
-Response Format
+#### Response Format
+
 ```json
 {
   "data": [
@@ -284,8 +291,9 @@ Response Format
     "isLast": false
   }
 }
+
 ```
-7️⃣ Error Handling Strategy
+## 7️⃣ Error Handling Strategy
 
 GlobalExceptionHandler ensures:
 
@@ -295,7 +303,7 @@ Proper HTTP status codes
 
 Validation error handling
 
-Status Codes:
+#### Status Codes:
 
 | Code | Meaning               |
 | ---- | --------------------- |
@@ -307,11 +315,11 @@ Status Codes:
 | 404  | Not Found             |
 | 500  | Internal Server Error |
 
-8️⃣ Configuration
+## 8️⃣ Configuration
 
 application.properties
 
-Important properties:
+#### Important properties:
 
 Server port
 
@@ -323,13 +331,14 @@ JWT secret key
 
 JWT expiration time
 
-Example:
+#### Example:
 
 jwt.secret=yourVeryLongSecretKeyHere
 jwt.expiration=3600000
 
 
-9️⃣ Non-Functional Requirements
+## 9️⃣ Non-Functional Requirements
+
 Performance
 
 Pagination prevents full table scans.
@@ -354,7 +363,7 @@ Token expiration enforced.
 
 No entity exposure (DTO used).
 
-🔟 Deployment Considerations
+## 🔟 Deployment Considerations
 
 Should run behind API Gateway.
 
@@ -364,7 +373,7 @@ Environment variables recommended for JWT secret.
 
 Use Docker for containerization.
 
-1️⃣1️⃣ Known Limitations
+## 1️⃣1️⃣  Known Limitations
 
 No soft delete (currently hard delete).
 
