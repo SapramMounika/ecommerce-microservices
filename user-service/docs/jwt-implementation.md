@@ -131,15 +131,15 @@ OncePerRequestFilter
 
 Responsibilities:
 
-1.Extract Authorization header
+1. Extract Authorization header
 
-2.Validate Bearer token
+2. Validate Bearer token
 
-3.Parse username and role
+3. Parse username and role
 
-4.Create Authentication object
+4. Create Authentication object
 
-5.Set SecurityContext
+5. Set SecurityContext
 
 This ensures every request is authenticated before reaching controller.
 
