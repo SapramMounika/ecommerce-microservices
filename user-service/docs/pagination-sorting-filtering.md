@@ -85,17 +85,13 @@ Spring automatically adds metadata like:
 #### Pros
 
  ✔ Easy to implement  
- 
  ✔ Uses Spring Data Page  
- 
  ✔ Good for internal APIs
 
 #### Cons
 
  ❌ Exposes Spring internal fields
- 
  ❌ Contains unnecessary metadata
- 
  ❌ Less clean API contract
 
 ### 🔹 B) Advanced Pagination (Production-Level)
@@ -114,12 +110,11 @@ This endpoint supports:
 
 ✅ Pagination  
 ✅ Sorting
-
-- ✅ Filtering by username
-- ✅ Filtering by role
-- ✅ Max page size validation
-- ✅ Allowed sort field validation
-- ✅ Custom clean response format
+✅ Filtering by username
+✅ Filtering by role
+✅ Max page size validation
+✅ Allowed sort field validation
+✅ Custom clean response format
 
 ## 4. API Parameters
 
