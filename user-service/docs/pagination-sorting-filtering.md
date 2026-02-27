@@ -104,7 +104,37 @@ We created a new endpoint without modifying the old one.
 GET /api/users/search
 
 ```
-## 3. Advanced Pagination Features
+## 🏗 PAGINATION FLOW ARCHITECTURE
+
+```
+Client (Postman / Frontend)
+        │
+        ▼
+Controller (UserController)
+        │
+        ▼
+Service Layer (UserServiceImpl)
+        │
+        ▼
+Spring Data JPA (Repository)
+        │
+        ▼
+Database (PostgreSQL)
+        │
+        ▼
+Spring builds Page<User>
+        │
+        ▼
+Service maps to DTO
+        │
+        ▼
+Controller returns PageResponse<UserGetResponse>
+        │
+        ▼
+Client receives clean JSON
+
+```
+## 4. Advanced Pagination Features
 
 This endpoint supports:
 
@@ -117,7 +147,7 @@ This endpoint supports:
 ✅ Custom clean response format 
 
 
-## 4. API Parameters
+## 5. API Parameters
 
 
 | Parameter | Description                        | Default |
@@ -130,7 +160,7 @@ This endpoint supports:
 | role      | Optional filter                    | null    |
 
 
-## 5️. Example Calls
+## 6. Example Calls
 
 #### Basic Pagination
 ```
@@ -161,7 +191,7 @@ GET /api/users/search?role=ROLE_ADMIN
 ```
 GET /api/users/search?page=0&size=5&sortBy=username&direction=asc&username=la&role=ROLE_USER
 ```
-## 6️. Advanced Response Structure
+## 7. Advanced Response Structure
 
 Instead of returning Spring’s Page object, we created:
 ```
@@ -187,7 +217,7 @@ PageResponse<T>
   }
 }
 ```
-## 7. Why Advanced Pagination Is Production-Level
+## 8. Why Advanced Pagination Is Production-Level
 
 #### 1️⃣ Hides Framework Internals
 
@@ -234,7 +264,7 @@ Client
 → PageResponse  
 → Client 
 
-## 8️. Database-Level Behavior
+## 9. Database-Level Behavior
 
 Spring automatically generates:
 
@@ -256,7 +286,7 @@ SELECT COUNT(*) FROM users;
 ```
 This is how totalElements and totalPages are calculated.
 
-## 9️. Backward Compatibility Maintained
+## 10. Backward Compatibility Maintained
 
 We DID NOT modify:
 ```
@@ -273,7 +303,7 @@ This ensures:
 -✅ Safe API evolution
 -✅ Version-safe design
 
-## 10. Comparison Summary
+## 11. Comparison Summary
 
 | Parameter | Description                        | Default |
 | --------- | ---------------------------------- | ------- |
@@ -284,7 +314,7 @@ This ensures:
 | username  | Optional filter                    | null    |
 | role      | Optional filter                    | null    |
 
-## 11. Architecture Value
+## 12. Architecture Value
 
 With advanced pagination implemented, User Service now supports:
 
@@ -294,7 +324,7 @@ With advanced pagination implemented, User Service now supports:
 * API contract control
 This aligns with microservices best practices.
 
- ## 12. Summary 
+ ## 13. Summary 
 
 I have implemented both basic and advanced pagination strategies. The advanced implementation includes secure sorting validation, filtering capabilities, max-size protection, and a custom PageResponse wrapper to hide framework internals and provide a clean, frontend-friendly API contract. This ensures scalability, security, and production readiness.
 
