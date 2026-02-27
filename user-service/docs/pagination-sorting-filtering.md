@@ -1,43 +1,45 @@
-USER SERVICE – PAGINATION, SORTING & FILTERING DOCUMENTATION
-1️⃣ Objective
+# 📘USER SERVICE – PAGINATION, SORTING & FILTERING DOCUMENTATION
+
+## 1. Objective
 
 To implement scalable data retrieval in User Service using:
 
-Pagination
-
-Sorting
-
-Filtering
-
-Clean API response design
-
-Backward compatibility (existing APIs unchanged)
+- Pagination
+- Sorting
+- Filtering
+- Clean API response design
+- Backward compatibility (existing APIs unchanged)
 
 This ensures:
 
-Performance optimization
+- Performance optimization
+- Secure API usage
+- Frontend-friendly responses
+- Production-ready architecture
 
-Secure API usage
-
-Frontend-friendly responses
-
-Production-ready architecture
-
-2️⃣ What We Implemented
+## 2. What We Implemented
 
 We implemented two versions:
 
-🔹 A) Basic Pagination (Spring Default)
-Endpoint
+### 🔹 A) Basic Pagination (Spring Default)
+
+#### Endpoint
+
+```
 GET /api/users/paginated
-Supports:
+```
 
-Pagination
+#### Supports:
 
-Sorting
+- Pagination
+- Sorting
 
-Example
+#### Example
+
+#### Endpoint
+```
 GET /api/users/paginated?page=0&size=2&sortBy=username&direction=asc
+```
 How It Works
 
 Returns Spring’s built-in:
