@@ -46,7 +46,7 @@ Client → API Gateway → User Service → PostgreSQL
   
 ---
 
-## 3️⃣ Database Design
+## 4. Database Design
 
 ### Table: `users`
 
@@ -59,9 +59,9 @@ Client → API Gateway → User Service → PostgreSQL
 
 ---
 
-## 4️⃣ Security Implementation
+## 5. Security Implementation
 
-### 4.1 🔐 Authentication 
+### 5.1 🔐 Authentication 
 1. User sends login request.
 2. Service validates credentials.
 3. JWT token is generated.
@@ -71,14 +71,14 @@ Client → API Gateway → User Service → PostgreSQL
    - expiration time
 5. Token is returned to client.
 
-### 4.2 🔐 Authorization 
+### 5.2 🔐 Authorization 
 1. Client sends JWT in Authorization header:
 2. JwtFilter validates token.
 3. SecurityContext is populated.
 4. @PreAuthorize checks user role.
 5. Access granted or denied.
 
-### 4.3 Role Permissions
+### 5.3 Role Permissions
 
 | Operation            | ADMIN        | USER |
 |------------          |--------      |--------|
@@ -92,11 +92,11 @@ Client → API Gateway → User Service → PostgreSQL
 
 ---
 
-## 5️⃣ API Documentation
+## 6. API Documentation
 
 ---
 
-### 🔹 5.1 Authentication APIs
+### 🔹 6.1 Authentication APIs
 
 #### Register
 
@@ -160,7 +160,7 @@ POST /api/auth/login
   "message": "Invalid credentials"
 }
 ```
-### 🔹 5.2 User CRUD APIs
+### 🔹 6.2 User CRUD APIs
 
 All endpoints require JWT authentication.
 
@@ -202,11 +202,11 @@ Role: ADMIN only
 }
 ```
 
-## 6️⃣ Pagination Implementation
+## 7. Pagination Implementation
 
 Two pagination strategies are implemented.
 
-#### 🔹 6.1 Basic Pagination (Spring Default)
+#### 🔹 7.1 Basic Pagination (Spring Default)
 ```
 GET /api/users/paginated
 ```
@@ -231,7 +231,7 @@ Returns Spring's Page<> object including:
 - first
 - last
 
-#### 🔹 6.2 Advanced Pagination (Production-Level)
+#### 🔹 7.2 Advanced Pagination (Production-Level)
 ```
 GET /api/users/search
 ```
@@ -283,7 +283,7 @@ GET /api/users/search?page=0&size=5&sortBy=username&direction=asc&username=la&ro
 }
 
 ```
-## 7️⃣ Error Handling Strategy
+## 8. Error Handling Strategy
 
 GlobalExceptionHandler ensures:
 
@@ -303,7 +303,7 @@ GlobalExceptionHandler ensures:
 | 404  | Not Found             |
 | 500  | Internal Server Error |
 
-## 8️⃣ Configuration
+## 9. Configuration
 
 application.properties
 
@@ -321,7 +321,7 @@ jwt.secret=yourVeryLongSecretKeyHere
 jwt.expiration=3600000
 ```
 
-## 9️⃣ Non-Functional Requirements
+## 10. Non-Functional Requirements
 
 #### Performance
 
@@ -341,14 +341,14 @@ jwt.expiration=3600000
 - Token expiration enforced.
 - No entity exposure (DTO used).
 
-## 🔟 Deployment Considerations
+## 11. Deployment Considerations
 
 - Should run behind API Gateway.
 - Direct service port access should be restricted in production.
 - Environment variables recommended for JWT secret.
 - Use Docker for containerization.
 
-## 1️⃣1️⃣  Known Limitations
+## 12. Known Limitations
 
 - No soft delete (currently hard delete).
 - Password encryption may be basic (can upgrade to BCrypt).
@@ -356,7 +356,7 @@ jwt.expiration=3600000
 - No audit fields (createdAt, updatedAt).
 
 
-## 1️⃣2️⃣ Future Enhancements
+## 13. Future Enhancements
 
 - BCrypt encryption
 - Audit fields
@@ -366,7 +366,7 @@ jwt.expiration=3600000
 - Rate limiting
 - Circuit breaker integration
 
-## 8️⃣ Architecture Flow
+## 14. Architecture Flow
 
 Client  
 ↓  
@@ -387,7 +387,7 @@ PageResponse Wrapper
 Client  
 
 
-## 🔟 Scalability Considerations
+## 15. Scalability Considerations
 
 - Pagination prevents loading entire dataset.
 - Sorting handled at database level.
@@ -395,7 +395,7 @@ Client
 - DTO prevents unnecessary data exposure.
 
 
-## 1️⃣2️⃣ Summary
+## 16. Summary
 
 The User Service is designed to be:
 
