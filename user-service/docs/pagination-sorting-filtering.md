@@ -93,7 +93,9 @@ Spring automatically adds metadata like:
 #### Cons
 
  ❌ Exposes Spring internal fields
+ 
  ❌ Contains unnecessary metadata
+ 
  ❌ Less clean API contract
 
 ### 🔹 B) Advanced Pagination (Production-Level)
