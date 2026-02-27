@@ -112,8 +112,10 @@ GET /api/users/search
 
 This endpoint supports:
 
-- ✅ Pagination
-- ✅ Sorting
+✅ Pagination  
+
+✅ Sorting
+
 - ✅ Filtering by username
 - ✅ Filtering by role
 - ✅ Max page size validation
