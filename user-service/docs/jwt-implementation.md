@@ -96,7 +96,7 @@ Created using:
 
 - Secret key
 - HS256 algorithm
-- 
+  
 Ensures token integrity.
 
 ## 5️. Implementation Components
