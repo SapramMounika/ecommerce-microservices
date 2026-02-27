@@ -113,7 +113,6 @@ GET /api/users/search
 This endpoint supports:
 
 ✅ Pagination  
-
 ✅ Sorting
 
 - ✅ Filtering by username
