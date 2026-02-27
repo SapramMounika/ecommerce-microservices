@@ -263,7 +263,6 @@ GlobalExceptionHandler ensures structured error responses.
 ## 13. Architecture Flow Diagram
 
 Client
-
 → API Gateway
 → JwtFilter
 → SecurityContext
