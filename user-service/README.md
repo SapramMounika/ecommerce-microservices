@@ -1,6 +1,6 @@
 # 👤 User Service Documentation
 
-## 1️⃣ Service Overview
+## **1** Service Overview
 
 The User Service is a core microservice in the E-Commerce Microservices Architecture.
 
