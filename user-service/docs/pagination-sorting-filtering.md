@@ -40,31 +40,30 @@ GET /api/users/paginated
 ```
 GET /api/users/paginated?page=0&size=2&sortBy=username&direction=asc
 ```
-How It Works
+#### How It Works
 
 Returns Spring’s built-in:
 
+```
 Page<UserGetResponse>
+
+```
 
 Spring automatically adds metadata like:
 
-content
+* content
+* pageable
+* totalElements
+* totalPages
+* first
+* last
+* size
+* number
 
-pageable
+#### Sample Response
 
-totalElements
+```json
 
-totalPages
-
-first
-
-last
-
-size
-
-number
-
-Sample Response
 {
   "content": [
     {
@@ -80,25 +79,32 @@ Sample Response
   "first": true,
   "last": false
 }
-Pros
+
+```
+
+#### Pros
 
 ✔ Easy to implement
 ✔ Uses Spring Data Page
 ✔ Good for internal APIs
 
-Cons
+#### Cons
 
 ❌ Exposes Spring internal fields
 ❌ Contains unnecessary metadata
 ❌ Less clean API contract
 
-🔹 B) Advanced Pagination (Production-Level)
+### 🔹 B) Advanced Pagination (Production-Level)
 
 We created a new endpoint without modifying the old one.
 
-Endpoint
+#### Endpoint
+
+```
 GET /api/users/search
-3️⃣ Advanced Pagination Features
+
+```
+## 3. Advanced Pagination Features
 
 This endpoint supports:
 
@@ -110,31 +116,58 @@ This endpoint supports:
 ✔ Allowed sort field validation
 ✔ Custom clean response format
 
-4️⃣ API Parameters
-Parameter	Description	Default
-page	Page number (0-based)	0
-size	Records per page	5
-sortBy	Field to sort (id, username, role)	id
-direction	asc / desc	asc
-username	Optional filter	null
-role	Optional filter	null
-5️⃣ Example Calls
-Basic Pagination
+## 4. API Parameters
+
+
+| Parameter | Description                        | Default |
+| --------- | ---------------------------------- | ------- |
+| page      | Page number (0-based)              | 0       |
+| size      | Records per page                   | 5       |
+| sortBy    | Field to sort (id, username, role) | id      |
+| direction | asc / desc                         | asc     |
+| username  | Optional filter                    | null    |
+| role      | Optional filter                    | null    |
+
+
+## 5️. Example Calls
+
+#### Basic Pagination
+```
 GET /api/users/search?page=0&size=5
-Sorting
+
+```
+#### Sorting
+
+```
 GET /api/users/search?sortBy=username&direction=desc
-Filtering by Username
+
+```
+#### Filtering by Username
+```
+
 GET /api/users/search?username=lal
-Filtering by Role
+
+```
+#### Filtering by Role
+
+```
+
 GET /api/users/search?role=ROLE_ADMIN
-Full Example
+
+```
+#### Full Example
+
+```
 GET /api/users/search?page=0&size=5&sortBy=username&direction=asc&username=la&role=ROLE_USER
-6️⃣ Advanced Response Structure
+```
+## 6️. Advanced Response Structure
 
 Instead of returning Spring’s Page object, we created:
-
+```
 PageResponse<T>
-Sample Response
+```
+#### Sample Response
+```json
 {
   "data": [
     {
@@ -152,41 +185,42 @@ Sample Response
     "isLast": false
   }
 }
-7️⃣ Why Advanced Pagination Is Production-Level
-1️⃣ Hides Framework Internals
+```
+## 7. Why Advanced Pagination Is Production-Level
+
+#### 1️⃣ Hides Framework Internals
 
 We do not expose:
 
-pageable
+* pageable
+* sort objects
+* internal flags
 
-sort objects
-
-internal flags
-
-2️⃣ Controlled API Contract
+#### 2️⃣ Controlled API Contract
 
 We decide what client sees.
 
-3️⃣ Security Protection
+#### 3️⃣ Security Protection
 
 We added:
-
+```
 int maxSize = 50;
-
+```
 Prevents:
-
+```
 size=100000
-4️⃣ Sort Field Validation
+```
+#### 4️⃣ Sort Field Validation
 
 Only allows:
 
-id
-username
-role
+- id
+- username
+- role
 
 Prevents malicious sorting.
 
-5️⃣ Clean Architecture
+#### 5️⃣ Clean Architecture
 
 Flow:
 
@@ -199,69 +233,71 @@ Client
 → PageResponse
 → Client
 
-8️⃣ Database-Level Behavior
+## 8️. Database-Level Behavior
 
 Spring automatically generates:
 
-Query 1 – Fetch Page
+#### Query 1 – Fetch Page
+
+```json
+
 SELECT * FROM users
 WHERE username ILIKE '%la%'
 AND role ILIKE '%ROLE_USER%'
 ORDER BY username ASC
 LIMIT 5 OFFSET 0;
-Query 2 – Count Total
+```
+#### Query 2 – Count Total
+```json
+
 SELECT COUNT(*) FROM users;
 
+```
 This is how totalElements and totalPages are calculated.
 
-9️⃣ Backward Compatibility Maintained
+## 9️. Backward Compatibility Maintained
 
 We DID NOT modify:
-
+```
 GET /api/users/viewAll
 GET /api/users/paginated
-
+```
 We only added:
-
+```
 GET /api/users/search
-
+```
 This ensures:
 
 ✔ No breaking changes
 ✔ Safe API evolution
 ✔ Version-safe design
 
-🔟 Comparison Summary
-Feature	Basic Pagination	Advanced Pagination
-Pagination	✅	✅
-Sorting	✅	✅
-Filtering	❌	✅
-Clean Response	❌	✅
-Security Validation	❌	✅
-Production Ready	Medium	High
-1️⃣1️⃣ Architecture Value
+## 10. Comparison Summary
+
+| Parameter | Description                        | Default |
+| --------- | ---------------------------------- | ------- |
+| page      | Page number (0-based)              | 0       |
+| size      | Records per page                   | 5       |
+| sortBy    | Field to sort (id, username, role) | id      |
+| direction | asc / desc                         | asc     |
+| username  | Optional filter                    | null    |
+| role      | Optional filter                    | null    |
+
+## 11. Architecture Value
 
 With advanced pagination implemented, User Service now supports:
 
-Scalable data retrieval
-
-Dynamic filtering
-
-Safe sorting
-
-API contract control
-
-Enterprise-level response format
-
+* Scalable data retrieval
+* Dynamic filtering
+* Safe sorting
+* API contract control
 This aligns with microservices best practices.
 
-1️⃣2️⃣ Presentation Summary (For Manager)
+ ## 12. Summary 
 
-You can say:
+I have implemented both basic and advanced pagination strategies. The advanced implementation includes secure sorting validation, filtering capabilities, max-size protection, and a custom PageResponse wrapper to hide framework internals and provide a clean, frontend-friendly API contract. This ensures scalability, security, and production readiness.
 
-We implemented both basic and advanced pagination strategies. The advanced implementation includes secure sorting validation, filtering capabilities, max-size protection, and a custom PageResponse wrapper to hide framework internals and provide a clean, frontend-friendly API contract. This ensures scalability, security, and production readiness.
-
-🎯 Current User Service Capabilities
+## 🎯 Current User Service Capabilities
 
 ✔ JWT Authentication
 ✔ Role-Based Authorization
