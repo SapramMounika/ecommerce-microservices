@@ -108,13 +108,13 @@ GET /api/users/search
 
 This endpoint supports:
 
-✅ Pagination
-✅ Sorting
-✅ Filtering by username
-✅ Filtering by role
-✅ Max page size validation
-✅ Allowed sort field validation
-✅ Custom clean response format
+✅ Pagination  
+✅ Sorting  
+✅ Filtering by username  
+✅ Filtering by role  
+✅ Max page size validation  
+✅ Allowed sort field validation  
+✅ Custom clean response format 
 
 
 ## 4. API Parameters
