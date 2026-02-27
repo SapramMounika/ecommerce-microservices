@@ -110,7 +110,7 @@ Request:
   "password": "password123",
   "role": "ROLE_USER"
 }
-
+```
 Response:
 
 ### Success Response (201)
@@ -119,40 +119,46 @@ Response:
 {
   "message": "User registered successfully"
 }
+```
 
 ### Error Response (400)
-
+```json
 {
   "timestamp": ".....",
   "status": 400,
   "message": "Username already exists"
 }
-
+```
 #### Login
 
 POST /api/auth/login
 
 Request:
 
+```json
 {
   "username": "mounika",
   "password": "password123"
 }
 
+```
 Success Response (200):
 
+```json
 {
   "token": "JWT_TOKEN"
 }
 
+```
 Error Response (401):
 
+```json
 {
   "timestamp": "...",
   "status": 401,
   "message": "Invalid credentials"
 }
-
+```
 🔹 5.2 User CRUD APIs
 
 All endpoints require JWT authentication.
@@ -184,10 +190,11 @@ Role: ADMIN only
 
 Response:
 
+```json
 {
   "message": "User deleted successfully"
 }
-
+```
 
 6️⃣ Pagination Implementation
 
@@ -259,7 +266,7 @@ Example
 GET /api/users/search?page=0&size=5&sortBy=username&direction=asc&username=la&role=ROLE_USER
 
 Response Format
-
+```json
 {
   "data": [
     {
@@ -277,7 +284,7 @@ Response Format
     "isLast": false
   }
 }
-
+```
 7️⃣ Error Handling Strategy
 
 GlobalExceptionHandler ensures:
