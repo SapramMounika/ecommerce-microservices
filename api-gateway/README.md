@@ -15,7 +15,8 @@ The gateway is responsible for:
 - JWT authentication validation (future-ready)
 - Security enforcement
 - Cross-cutting concerns (logging, monitoring, rate limiting)
-
+- Blocking unauthorized access
+- Validating JWT tokens
 ---
 
 ## 2. Why API Gateway?
@@ -48,7 +49,154 @@ In microservices architecture:
 - Maven
 
 ---
+🔐 Security Implementation
+1️⃣ JWT Validation
 
+The Gateway validates every request except:
+
+/api/auth/**
+
+Token is extracted from:
+
+Authorization: Bearer <JWT_TOKEN>
+
+Validation steps:
+
+Check Authorization header
+
+Extract token
+
+Verify signature using secret key
+
+Extract role claim
+
+Apply role-based access rules
+
+2️⃣ Role-Based Access Control (RBAC)
+Allowed Access Rules
+HTTP Method	ROLE_USER	ROLE_ADMIN
+GET	✅	✅
+POST	❌	✅
+PUT	❌	✅
+DELETE	❌	✅
+3️⃣ Access Denied Response
+
+If unauthorized access is attempted:
+
+{
+  "message": "Access Denied"
+}
+
+HTTP Status:
+
+403 Forbidden
+🧠 Implementation Details
+📂 Project Structure
+api-gateway
+└── src/main/java
+    └── com.ecommerce.apigateway
+        ├── filter
+        │    └── JwtFilter.java
+        └── util
+             └── JwtUtil.java
+🔑 JwtUtil.java
+
+Responsible for:
+
+Validating JWT signature
+
+Extracting claims
+
+Secret key is injected from:
+
+jwt.secret=mysecretkeymysecretkeymysecretkey123
+🔐 JwtFilter.java
+
+Implements:
+
+GlobalFilter
+Ordered
+
+Main Responsibilities:
+
+Skip /api/auth/**
+
+Validate JWT
+
+Extract role
+
+Restrict write operations to ADMIN
+
+Return JSON error for forbidden access
+
+⚙️ Gateway Configuration
+application.properties
+server.port=8080
+
+spring.application.name=api-gateway
+
+# Eureka
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka/
+
+# Product Service Route
+spring.cloud.gateway.routes[0].id=product-service
+spring.cloud.gateway.routes[0].uri=lb://PRODUCT-SERVICE
+spring.cloud.gateway.routes[0].predicates[0]=Path=/api/products/**
+
+# User Service Route
+spring.cloud.gateway.routes[1].id=user-service
+spring.cloud.gateway.routes[1].uri=lb://USER-SERVICE
+spring.cloud.gateway.routes[1].predicates[0]=Path=/api/auth/**
+
+# JWT Secret
+jwt.secret=mysecretkeymysecretkeymysecretkey123
+🧪 Testing
+Login (Get Token)
+POST http://localhost:8080/api/auth/login
+Create Product (Admin Only)
+POST http://localhost:8080/api/products/add
+
+Header:
+
+Authorization: Bearer <ADMIN_TOKEN>
+🚨 Important Notes
+
+Direct access to product-service (8083) bypasses security.
+
+Always access APIs via Gateway (8080).
+
+Gateway is the only public entry point.
+
+All microservices register via Eureka.
+
+🏆 What We Achieved
+
+✔ Centralized JWT Validation
+✔ Role-Based Authorization
+✔ Custom JSON Error Response
+✔ Secure Routing
+✔ Service Discovery Integration
+✔ Production-Ready Security Flow
+
+🔮 Future Enhancements
+
+Refresh Token mechanism
+
+Rate limiting
+
+API versioning
+
+Logging & Monitoring
+
+Circuit breaker
+
+Request tracing
+
+CORS configuration
+
+Docker & Deployment
+
+👩‍💻 Author
 ## 4️. Architecture Role
 
 #### Request Flow
