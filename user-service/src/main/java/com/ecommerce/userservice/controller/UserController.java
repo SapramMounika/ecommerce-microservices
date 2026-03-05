@@ -2,6 +2,7 @@ package com.ecommerce.userservice.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,6 +103,60 @@ public class UserController {
                 "SUCCESS",
                 "User deleted successfully",
                 response
+        );
+    }
+    
+    //Get User With Pagination
+    
+    @GetMapping("/paginated")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    public Page<UserGetResponse> getUsersWithPagination(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return userService.getUsersWithPagination(page, size, sortBy, direction);
+    }
+    /**
+     * Advanced search endpoint supporting:
+     * - Pagination
+     * - Sorting
+     * - Filtering (username, role)
+     *
+     * Example:
+     * GET /api/users/search?page=0&size=5&sortBy=username&direction=asc&username=la&role=ROLE_USER
+     */
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    public PageResponse<UserGetResponse> searchUsers(
+
+            // Page number (default 0)
+            @RequestParam(defaultValue = "0") int page,
+
+            // Number of records per page (default 5)
+            @RequestParam(defaultValue = "5") int size,
+
+            // Field to sort by (default id)
+            @RequestParam(defaultValue = "id") String sortBy,
+
+            // Sorting direction (asc or desc)
+            @RequestParam(defaultValue = "asc") String direction,
+
+            // Optional filter: username contains search
+            @RequestParam(required = false) String username,
+
+            // Optional filter: role contains search
+            @RequestParam(required = false) String role
+    ) {
+
+        return userService.searchUsers(
+                page,
+                size,
+                sortBy,
+                direction,
+                username,
+                role
         );
     }
 }

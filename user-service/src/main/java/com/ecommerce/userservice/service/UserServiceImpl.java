@@ -2,7 +2,10 @@ package com.ecommerce.userservice.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.userservice.dto.*;
@@ -126,5 +129,121 @@ Return response*/
         userRepository.deleteById(id);
 
         return new UserDeleteResponse("User deleted successfully");
+    }
+    //Get User With Pagination
+    @Override
+    public Page<UserGetResponse> getUsersWithPagination(
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<User> userPage = userRepository.findAll(pageable);
+
+        return userPage.map(user ->
+                new UserGetResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getRole()
+                )
+        );
+    }
+    
+    @Override
+    public PageResponse<UserGetResponse> searchUsers(
+            int page,
+            int size,
+            String sortBy,
+            String direction,
+            String username,
+            String role) {
+
+        // ---------------------------------------------------------
+        // 1️⃣ Protect against extremely large page sizes
+        //    (Prevents performance issues and abuse attacks)
+        // ---------------------------------------------------------
+        int maxSize = 50;
+        if (size > maxSize) {
+            size = maxSize;
+        }
+
+        // ---------------------------------------------------------
+        // 2️⃣ Validate allowed sort fields
+        //    Prevents sorting by unsafe or invalid fields
+        // ---------------------------------------------------------
+        List<String> allowedSortFields = List.of("id", "username", "role");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "id"; // fallback to safe default
+        }
+
+        // ---------------------------------------------------------
+        // 3️⃣ Create Sort object dynamically
+        // ---------------------------------------------------------
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        // ---------------------------------------------------------
+        // 4️⃣ Create Pageable object
+        //    Converts page + size + sort into SQL LIMIT & OFFSET
+        // ---------------------------------------------------------
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // ---------------------------------------------------------
+        // 5️⃣ Null-safe filtering
+        //    If filter parameters are null, use empty string
+        //    This allows "contains" query to return all records
+        // ---------------------------------------------------------
+        String usernameFilter = (username == null) ? "" : username;
+        String roleFilter = (role == null) ? "" : role;
+
+        // ---------------------------------------------------------
+        // 6️⃣ Execute repository query with filtering + pagination
+        //    Spring automatically generates:
+        //    - SELECT query with LIMIT and OFFSET
+        //    - COUNT query for totalElements
+        // ---------------------------------------------------------
+        Page<User> userPage =
+                userRepository.findByUsernameContainingIgnoreCaseAndRoleContainingIgnoreCase(
+                        usernameFilter,
+                        roleFilter,
+                        pageable
+                );
+
+        // ---------------------------------------------------------
+        // 7️⃣ Convert Entity -> DTO
+        //    Prevents exposing internal entity structure
+        // ---------------------------------------------------------
+        List<UserGetResponse> users = userPage.getContent().stream()
+                .map(user -> new UserGetResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getRole()
+                ))
+                .toList();
+
+        // ---------------------------------------------------------
+        // 8️⃣ Build pagination metadata
+        // ---------------------------------------------------------
+        PaginationResponse pagination = new PaginationResponse(
+                userPage.getNumber(),          // current page number
+                userPage.getSize(),            // page size
+                userPage.getTotalElements(),   // total records in DB
+                userPage.getTotalPages(),      // total pages available
+                userPage.isFirst(),            // is first page?
+                userPage.isLast()              // is last page?
+        );
+
+        // ---------------------------------------------------------
+        // 9️⃣ Wrap data + pagination into clean response object
+        // ---------------------------------------------------------
+        return new PageResponse<>(users, pagination);
     }
 }
