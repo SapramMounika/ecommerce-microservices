@@ -1,6 +1,5 @@
 package com.ecommerce.userservice.response;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
