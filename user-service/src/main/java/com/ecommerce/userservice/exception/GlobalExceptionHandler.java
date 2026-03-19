@@ -85,6 +85,17 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED
         );
     }
+    
+    
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUserAlreadyExists(
+            UserAlreadyExistsException ex) {
+
+        return ApiResponseBuilder.error(
+                ex.getMessage(),
+                HttpStatus.CONFLICT
+        );
+    }
 
     // 500 - Generic Exception
     @ExceptionHandler(Exception.class)

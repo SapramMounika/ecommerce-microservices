@@ -50,8 +50,8 @@ public class AuthServiceImpl implements AuthService {
         return new RegisterResponse(
                 savedUser.getId(),
                 savedUser.getUsername(),
-                savedUser.getRole(),
-                "User registered successfully"
+                savedUser.getRole()
+                
         );
     }
 

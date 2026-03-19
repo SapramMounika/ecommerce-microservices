@@ -89,8 +89,8 @@ Return response*/
         return new UserCreateResponse(
                 saved.getId(),
                 saved.getUsername(),
-                saved.getRole(),
-                "User created successfully"
+                saved.getRole()
+               
         );
     }
 

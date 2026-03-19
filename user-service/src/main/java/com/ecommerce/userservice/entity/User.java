@@ -20,6 +20,9 @@ public class User {
 	private String password;
 	@Column(nullable = false)
 	private String role; // ROLE_ADMIN / ROLE_USER
+	
+	
+	
 	public Long getId() {
 		return id;
 	}
