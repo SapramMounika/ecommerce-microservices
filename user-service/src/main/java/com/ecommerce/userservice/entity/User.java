@@ -20,9 +20,13 @@ public class User {
 	private String password;
 	@Column(nullable = false)
 	private String role; // ROLE_ADMIN / ROLE_USER
+	public User() {
+	}
 	
-	
-	
+	public User(String username, String password) {
+	    this.username = username;
+	    this.password = password;
+	}
 	public Long getId() {
 		return id;
 	}

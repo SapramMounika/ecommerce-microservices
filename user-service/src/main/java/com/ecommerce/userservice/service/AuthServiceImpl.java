@@ -28,49 +28,76 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse register(RegisterRequest request) {
 
-        // Check if username already exists
+        // ✅ 1. Validate request object
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
+        }
+
+        // ✅ 2. Validate username
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+
+        // ✅ 3. Validate password
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+
+        // ✅ 4. Check if username already exists
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException("Username already exists");
         }
 
-        // Create new user
+        // ✅ 5. Create user
         User user = new User();
-        user.setUsername(request.getUsername());
-
-        // ⚠️ In production we hash password
-        user.setPassword(request.getPassword());
-
-        // Default role
+        user.setUsername(request.getUsername().trim());
+        user.setPassword(request.getPassword().trim()); // ⚠️ hash in real apps
         user.setRole("ROLE_USER");
 
-        // Save user
+        // ✅ 6. Save user
         User savedUser = userRepository.save(user);
 
-        // Return response
+        // ✅ 7. Return response
         return new RegisterResponse(
                 savedUser.getId(),
                 savedUser.getUsername(),
                 savedUser.getRole()
-                
         );
     }
 
-    // LOGIN
+    // LOGIN 
     @Override
     public LoginResponse login(LoginRequest request) {
 
+        // ✅ 1. Validate request
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
+        }
+
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new InvalidCredentialsException("Invalid username or password");
+        }
+
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new InvalidCredentialsException("Invalid username or password");
+        }
+
+        // ✅ 2. Fetch user
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
+        // ✅ 3. Validate password
         if (!request.getPassword().equals(user.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
 
+        // ✅ 4. Generate JWT
         String token = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getRole()
         );
 
+        // ✅ 5. Return response
         return new LoginResponse(token);
     }
 }
