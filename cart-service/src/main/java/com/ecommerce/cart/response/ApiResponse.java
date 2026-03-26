@@ -8,6 +8,26 @@ public class ApiResponse<T> {
     private T data;
     private int status;
 	private LocalDateTime timestamp;
+	 
+    public ApiResponse() {
+    }
+	public ApiResponse(boolean success, String message, T data, int status, LocalDateTime timestamp) {
+	    this.success = success;
+	    this.message = message;
+	    this.data = data;
+	    this.status = status;
+	    this.timestamp = timestamp;
+	}
+	
+	public ApiResponse(boolean success, String message, T data) {
+	    this.success = success;
+	    this.message = message;
+	    this.data = data;
+	}
+	
+	
+	
+	
 	public boolean isSuccess() {
 		return success;
 	}

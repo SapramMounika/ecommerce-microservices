@@ -23,9 +23,8 @@ public class Cart {
 	@Column(name = "user_id")
 	private Long userId;
 	
-	 @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CartItem> items = new ArrayList<>();
-
 	 public Long getId() {
 		 return id;
 	 }
