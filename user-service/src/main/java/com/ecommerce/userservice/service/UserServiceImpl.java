@@ -101,7 +101,7 @@ Return response*/
     public UserUpdateResponse updateUser(Long id, UserUpdateRequest request) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setUsername(request.getUsername());
         user.setRole(request.getRole());
@@ -111,8 +111,8 @@ Return response*/
         return new UserUpdateResponse(
                 updated.getId(),
                 updated.getUsername(),
-                updated.getRole(),
-                "User updated successfully"
+                updated.getRole()
+                
         );
     }
 
@@ -123,12 +123,12 @@ Return response*/
     public UserDeleteResponse deleteUser(Long id) {
 
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
+            throw new ResourceNotFoundException("User not found with id: " + id);
         }
 
         userRepository.deleteById(id);
 
-        return new UserDeleteResponse("User deleted successfully");
+        return new UserDeleteResponse(id);
     }
     //Get User With Pagination
     @Override

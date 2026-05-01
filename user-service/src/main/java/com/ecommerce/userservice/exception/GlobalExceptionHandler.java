@@ -99,10 +99,11 @@ public class GlobalExceptionHandler {
 
     // 500 - Generic Exception
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGeneric(Exception ex) {
-
+    public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
+    	 ex.printStackTrace(); 
         return ApiResponseBuilder.error(
-                "Something went wrong",
+        		ex.getMessage(),
+               
                 HttpStatus.INTERNAL_SERVER_ERROR
         );
     }

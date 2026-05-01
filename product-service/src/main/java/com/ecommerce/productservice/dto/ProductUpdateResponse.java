@@ -93,8 +93,8 @@ public class ProductUpdateResponse {
         return stock;
     }
 
-    public void setStock(String stock) {
-        this.stock = stock;
+    public void setStock(String string) {
+        this.stock = string;
     }
 
     public Boolean getActive() {

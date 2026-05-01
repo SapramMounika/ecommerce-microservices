@@ -89,8 +89,8 @@ public class ProductGetResponse {
         return stock;
     }
 
-    public void setStock(String stock) {
-        this.stock = stock;
+    public void setStock(String integer) {
+        this.stock = integer;
     }
 
     public Boolean getActive() {

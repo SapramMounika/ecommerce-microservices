@@ -182,7 +182,7 @@ class AuthServiceTest {
         when(userRepository.findByUsername("username"))
                 .thenReturn(Optional.of(user));
 
-        when(jwtUtil.generateToken("username", "ROLE_USER"))
+        when(jwtUtil.generateToken(1L,"username", "ROLE_USER"))
                 .thenReturn("token");
 
         LoginResponse response = authService.login(request);

@@ -100,21 +100,44 @@ public class JwtFilter implements GlobalFilter, Ordered {
             Claims claims = jwtUtil.validateAndGetClaims(token);
 
             String role = claims.get("role", String.class);
-            
             String method = exchange.getRequest().getMethod().name();
 
-            // ===============================
-            // ✅ ADD USER ID HEADER (IMPORTANT FIX)
-            // ===============================
+            // ✅ Extract user info
+            Object userIdObj = claims.get("userId");
+            if (userIdObj == null) {
+                return unauthorized(exchange, "Invalid token: userId missing");
+            }
+
+            String userId = userIdObj.toString();
+            String username = claims.getSubject();
+
+            // ✅ Add headers safely
             ServerWebExchange mutatedExchange = exchange.mutate()
-                    
+                    .request(builder -> builder.headers(headers -> {
+                        headers.remove("X-User-Id");
+                        headers.remove("X-Username");
+                        headers.remove("X-Role");
+
+                        headers.add("X-User-Id", userId);
+                        headers.add("X-Username", username);
+                        headers.add("X-Role", role);
+                    }))
                     .build();
 
-            // Debug logs
             System.out.println("ROLE: " + role);
             System.out.println("PATH: " + path);
             System.out.println("METHOD: " + method);
-           
+
+            // ===============================
+            // ✅ ALLOW USER TO PLACE ORDER
+            // ===============================
+            if (path.startsWith("/api/orders") && "POST".equals(method)) {
+                if (!role.equals("USER") && !role.equals("ROLE_USER")) {
+                    return accessDenied(exchange, "Only users can place orders");
+                }
+                return chain.filter(mutatedExchange);
+            }
+
             // ===============================
             // 🔐 GET → USER + ADMIN
             // ===============================
@@ -131,7 +154,6 @@ public class JwtFilter implements GlobalFilter, Ordered {
             // ===============================
             if (path.startsWith("/api/cart")) {
 
-                // USER operations
                 if (path.equals("/api/cart/add") ||
                     path.equals("/api/cart/update") ||
                     path.equals("/api/cart/remove") ||
@@ -144,9 +166,7 @@ public class JwtFilter implements GlobalFilter, Ordered {
                     }
                 }
 
-                // ADMIN operations
                 if (path.startsWith("/api/cart/admin")) {
-
                     if (role.equals("USER") || role.equals("ROLE_USER")) {
                         return accessDenied(exchange,
                                 "User cannot access admin cart operations");
@@ -165,10 +185,10 @@ public class JwtFilter implements GlobalFilter, Ordered {
                 }
             }
 
-            // ✅ Continue with modified exchange
             return chain.filter(mutatedExchange);
 
         } catch (Exception e) {
+            e.printStackTrace(); // 🔥 important for debugging
             return unauthorized(exchange, "Invalid token");
         }
     }

@@ -24,7 +24,7 @@ public class Inventory {
 
 	    @Column(nullable = false)
 	    private Integer quantity;
-
+	    @Column(nullable = false)
 	    private String stock;
 	    
 	    private Boolean active;

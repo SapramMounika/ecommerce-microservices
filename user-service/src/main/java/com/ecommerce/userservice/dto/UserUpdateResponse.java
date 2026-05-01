@@ -4,13 +4,13 @@ public class UserUpdateResponse {
 	 private Long id;
 	    private String username;
 	    private String role;
-	    private String message;
+	    
 
-	    public UserUpdateResponse(Long id, String username, String role, String message) {
+	    public UserUpdateResponse(Long id, String username, String role) {
 	        this.id = id;
 	        this.username = username;
 	        this.role = role;
-	        this.message = message;
+	       
 	    }
 
 		public Long getId() {
@@ -37,11 +37,5 @@ public class UserUpdateResponse {
 			this.role = role;
 		}
 
-		public String getMessage() {
-			return message;
-		}
-
-		public void setMessage(String message) {
-			this.message = message;
-		}
+		
 }

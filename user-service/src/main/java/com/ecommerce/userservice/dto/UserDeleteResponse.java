@@ -1,13 +1,19 @@
 package com.ecommerce.userservice.dto;
 
 public class UserDeleteResponse {
-	private String message;
+	private Long userId;
 
-    public UserDeleteResponse(String message) {
-        this.message = message;
+    public UserDeleteResponse(Long userId) {
+        this.userId = userId;
     }
 
-    public String getMessage() {
-        return message;
-    }
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+   
 }
