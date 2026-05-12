@@ -240,27 +240,40 @@ public class OrderServiceImpl implements OrderService {
 
         return ApiResponseBuilder.success("Order cancelled", response, HttpStatus.OK);
     }
+    
+    
+    
+    
+    
     @Override
-    public ResponseEntity<ApiResponse<UpdateOrderStatusResponse>> updateOrderStatus(UpdateOrderStatusRequest request) {
+    public ResponseEntity<ApiResponse<UpdateOrderStatusResponse>> updateOrderStatus(
+            UpdateOrderStatusRequest request) {
 
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new OrderNotFoundException(request.getOrderId()));
 
         OrderStatus newStatus;
+
         try {
-            newStatus = OrderStatus.valueOf(request.getStatus());
+            newStatus = OrderStatus.valueOf(request.getStatus().toUpperCase());
         } catch (Exception e) {
             throw new InvalidOrderStateException("Invalid order status");
         }
 
         order.setStatus(newStatus);
+
         orderRepository.save(order);
 
         UpdateOrderStatusResponse response = new UpdateOrderStatusResponse();
+
         response.setOrderId(order.getOrderId());
         response.setStatus(order.getStatus().name());
         response.setMessage("Order status updated successfully");
 
-        return ApiResponseBuilder.success("Order status updated", response, HttpStatus.OK);
+        return ApiResponseBuilder.success(
+                "Order status updated",
+                response,
+                HttpStatus.OK
+        );
     }
 }

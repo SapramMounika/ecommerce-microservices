@@ -20,44 +20,43 @@ import com.ecommerce.order.response.ApiResponse;
 
 public interface OrderService {
 
-    // ===============================
-    // 🛒 PLACE ORDER
-    // ===============================
+   
+    //  PLACE ORDER
+   
     ResponseEntity<ApiResponse<PlaceOrderResponse>> placeOrder(
             PlaceOrderRequest request
     );
 
-    // ===============================
-    // 📄 GET ORDER BY ID
-    // ===============================
+    //  GET ORDER BY ID
+    
     ResponseEntity<ApiResponse<GetOrderByIdResponse>> getOrderById(
             GetOrderByIdRequest request
     );
 
-    // ===============================
-    // 📄 GET MY ORDERS
-    // ===============================
+    
+    //  GET MY ORDERS
+    
     ResponseEntity<ApiResponse<List<GetMyOrdersResponse>>> getMyOrders(
             GetMyOrdersRequest request
     );
 
-    // ===============================
-    // ❌ CANCEL ORDER
-    // ===============================
+    
+    //  CANCEL ORDER
+    
     ResponseEntity<ApiResponse<CancelOrderResponse>> cancelOrder(
             CancelOrderRequest request
     );
 
-    // ===============================
-    // 🔄 UPDATE ORDER STATUS (ADMIN)
-    // ===============================
+   
+    //  UPDATE ORDER STATUS (ADMIN)
+   
     ResponseEntity<ApiResponse<UpdateOrderStatusResponse>> updateOrderStatus(
             UpdateOrderStatusRequest request
     );
 
-    // ===============================
-    // 👨‍💼 GET ALL ORDERS (ADMIN)
-    // ===============================
+  
+    //  GET ALL ORDERS (ADMIN)
+   
     ResponseEntity<ApiResponse<List<GetAllOrdersResponse>>> getAllOrders(
             GetAllOrdersRequest request
     );

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import jakarta.transaction.Transactional;
 import com.ecommerce.cart.client.ProductClient;
 import com.ecommerce.cart.dto.*;
 import com.ecommerce.cart.entity.Cart;
@@ -16,6 +16,7 @@ import com.ecommerce.cart.response.ApiResponse;
 import com.ecommerce.cart.response.ApiResponseBuilder;
 
 @Service
+@Transactional
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
@@ -31,7 +32,7 @@ this.productClient = productClient;
     
     @Override
     public ApiResponse<AddToCartResponse> addItemToCart(Long userId, AddToCartRequest request) {
-
+    	System.out.println("ADD TO CART USER ID: " + userId);
         // 1. Fetch existing cart OR create new cart for user
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
@@ -214,7 +215,7 @@ this.productClient = productClient;
     
     @Override
     public ApiResponse<ViewCartResponse> viewCart(Long userId) {
-
+    	System.out.println("VIEW CART USER ID: " + userId);
         // 1. Fetch cart
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found"));
@@ -239,7 +240,7 @@ this.productClient = productClient;
                 .mapToDouble(ViewCartResponse.Item::getTotalPrice)
                 .sum());
 
-     
+        System.out.println("CART ITEMS COUNT: " + cart.getItems().size());
         
         
         return new ApiResponse<>(
@@ -280,7 +281,7 @@ this.productClient = productClient;
         response.setTotalAmount(0.0);
 
         
-        
+        System.out.println("CLEAR CART CALLED FOR USER: " + userId);
         
         return new ApiResponse<>(
                 true,

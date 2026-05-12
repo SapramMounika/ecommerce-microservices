@@ -19,19 +19,19 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // ===============================
-    // 🛒 PLACE ORDER
-    // ===============================
-    @PostMapping
+   
+    //  PLACE ORDER
+   
+    @PostMapping("/placeOrder")
     public ResponseEntity<ApiResponse<PlaceOrderResponse>> placeOrder(
             @RequestBody PlaceOrderRequest request) {
 
         return orderService.placeOrder(request);
     }
 
-    // ===============================
-    // 📄 GET ORDER BY ID
-    // ===============================
+    
+    //  GET ORDER BY ID
+    
     @GetMapping("/get/{orderId}")
     public ResponseEntity<ApiResponse<GetOrderByIdResponse>> getOrderById(
             @PathVariable Long orderId) {
@@ -42,25 +42,25 @@ public class OrderController {
         return orderService.getOrderById(request);
     }
 
-    // ===============================
-    // 📄 GET MY ORDERS
-    // ===============================
+    
+    //  GET MY ORDERS
+   
     @GetMapping("/getMyOrders")
     public ResponseEntity<ApiResponse<List<GetMyOrdersResponse>>> getMyOrders() {
         return orderService.getMyOrders(new GetMyOrdersRequest());
     }
 
-    // ===============================
-    // 👨‍💼 GET ALL ORDERS (ADMIN)
-    // ===============================
+   
+    //  GET ALL ORDERS (ADMIN)
+    
     @GetMapping("/admin/getAllOrders")
     public ResponseEntity<ApiResponse<List<GetAllOrdersResponse>>> getAllOrders() {
         return orderService.getAllOrders(new GetAllOrdersRequest());
     }
 
-    // ===============================
-    // ❌ CANCEL ORDER
-    // ===============================
+    
+    //  CANCEL ORDER
+    
     @PutMapping("/cancel")
     public ResponseEntity<ApiResponse<CancelOrderResponse>> cancelOrder(
             @RequestBody CancelOrderRequest request) {
@@ -68,11 +68,20 @@ public class OrderController {
         return orderService.cancelOrder(request);
     }
 
-    // ===============================
-    // 🔄 UPDATE ORDER STATUS (ADMIN)
-    // ===============================
+    
+    //  UPDATE ORDER STATUS (ADMIN)
+    
     @PutMapping("/admin/status")
     public ResponseEntity<ApiResponse<UpdateOrderStatusResponse>> updateOrderStatus(
+            @RequestBody UpdateOrderStatusRequest request) {
+
+        return orderService.updateOrderStatus(request);
+    }
+    
+ // INTERNAL ORDER STATUS UPDATE
+
+    @PutMapping("/internal/status")
+    public ResponseEntity<ApiResponse<UpdateOrderStatusResponse>> internalUpdateOrderStatus(
             @RequestBody UpdateOrderStatusRequest request) {
 
         return orderService.updateOrderStatus(request);

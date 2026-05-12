@@ -173,7 +173,26 @@ public class JwtFilter implements GlobalFilter, Ordered {
                     }
                 }
             }
+         // ===============================
+         // 💳 PAYMENT RULES
+            if (path.startsWith("/payments")) {
 
+                if (!role.equals("USER") && !role.equals("ROLE_USER")) {
+                    return accessDenied(exchange,
+                            "Only users can make payments");
+                }
+
+                System.out.println("FORWARDING TO PAYMENT SERVICE");
+
+                return chain.filter(mutatedExchange);
+            }
+         
+      // ===============================
+      // 🔥 INTERNAL SERVICE APIs
+      // ===============================
+      if (path.startsWith("/api/orders/internal")) {
+          return chain.filter(mutatedExchange);
+      }
             // ===============================
             // 🔒 OTHER SERVICES
             // ===============================
@@ -188,8 +207,10 @@ public class JwtFilter implements GlobalFilter, Ordered {
             return chain.filter(mutatedExchange);
 
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 important for debugging
-            return unauthorized(exchange, "Invalid token");
+
+            e.printStackTrace();
+
+            return unauthorized(exchange, e.getMessage());
         }
     }
 

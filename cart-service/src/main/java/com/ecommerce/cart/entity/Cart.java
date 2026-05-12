@@ -20,11 +20,14 @@ public class Cart {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
-	@Column(name = "user_id")
+	@Column(name = "user_id", unique = true, nullable = false)
 	private Long userId;
 	
 	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CartItem> items = new ArrayList<>();
+	
+	
+	
 	 public Long getId() {
 		 return id;
 	 }
