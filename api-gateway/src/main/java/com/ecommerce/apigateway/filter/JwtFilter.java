@@ -114,19 +114,61 @@ public class JwtFilter implements GlobalFilter, Ordered {
             // ✅ Add headers safely
             ServerWebExchange mutatedExchange = exchange.mutate()
                     .request(builder -> builder.headers(headers -> {
-                        headers.remove("X-User-Id");
-                        headers.remove("X-Username");
-                        headers.remove("X-Role");
+                    	headers.remove("X-User-Id");
+                    	headers.remove("X-Username");
+                    	headers.remove("X-Role");
+                    	headers.remove("X-User-Role");
 
-                        headers.add("X-User-Id", userId);
-                        headers.add("X-Username", username);
-                        headers.add("X-Role", role);
+                    	// Add trusted headers extracted from the validated JWT
+                    	headers.add("X-User-Id", userId);
+                    	headers.add("X-Username", username);
+                    	headers.add("X-Role", role);
+                    	headers.add("X-User-Role", role);
                     }))
                     .build();
 
             System.out.println("ROLE: " + role);
             System.out.println("PATH: " + path);
             System.out.println("METHOD: " + method);
+
+            // ===============================
+            // PRODUCT AUTHORIZATION RULES
+            // ===============================
+            if (path.startsWith("/api/products")) {
+
+                boolean isAdmin =
+                        "ADMIN".equals(role)
+                        || "ROLE_ADMIN".equals(role);
+
+                boolean isUser =
+                        "USER".equals(role)
+                        || "ROLE_USER".equals(role);
+
+                // ADMIN has full access to Product APIs
+                if (isAdmin) {
+                    return chain.filter(mutatedExchange);
+                }
+
+                // USER can only view all products or view by ID
+                boolean isViewAll =
+                        "GET".equals(method)
+                        && "/api/products/viewAll".equals(path);
+
+                boolean isViewById =
+                        "GET".equals(method)
+                        && path.matches(
+                                "/api/products/viewById/\\d+"
+                        );
+
+                if (isUser && (isViewAll || isViewById)) {
+                    return chain.filter(mutatedExchange);
+                }
+
+                return accessDenied(
+                        exchange,
+                        "Access denied: insufficient product permissions"
+                );
+            }
 
             // ===============================
             // ✅ ALLOW USER TO PLACE ORDER

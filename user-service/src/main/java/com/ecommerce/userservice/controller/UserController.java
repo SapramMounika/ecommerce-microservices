@@ -25,6 +25,7 @@ public class UserController {
     }
 
     // VIEW ALL USERS
+    
     @GetMapping("/viewAll")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<ApiResponse<List<UserGetResponse>>> getAllUsers() {
@@ -39,6 +40,7 @@ public class UserController {
     }
 
     // VIEW USER BY ID
+    
     @GetMapping("/viewById/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<ApiResponse<UserGetResponse>> getUserById(@PathVariable Long id) {
@@ -53,6 +55,7 @@ public class UserController {
     }
 
     // CREATE USER
+    
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserCreateResponse>> createUser(
@@ -68,6 +71,7 @@ public class UserController {
     }
 
     // UPDATE USER
+    
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserUpdateResponse>> updateUser(

@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
         // ✅ 5. Create user
         User user = new User();
         user.setUsername(request.getUsername().trim());
-        user.setPassword(request.getPassword().trim()); // ⚠️ hash in real apps
+        user.setPassword(request.getPassword().trim()); 
         user.setRole("ROLE_USER");
 
         // ✅ 6. Save user

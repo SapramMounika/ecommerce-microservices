@@ -3,7 +3,6 @@ package com.ecommerce.cart.dto;
 import java.util.List;
 
 public class RemoveCartItemResponse {
-
 	private Long cartId;
     private Long userId;
     private List<Item> items;
@@ -81,6 +80,4 @@ public class RemoveCartItemResponse {
 		this.totalAmount = totalAmount;
 	}
     
-    
-	
 }

@@ -2,9 +2,9 @@ package com.ecommerce.cart.dto;
 
 import java.util.List;
 
-public class ClearCartResponse {
+public class ViewMyCart {
 
-	private Long cartId;
+    private Long cartId;
     private Long userId;
     private List<Item> items;
     private Double totalAmount;
@@ -45,8 +45,9 @@ public class ClearCartResponse {
 		public void setTotalPrice(Double totalPrice) {
 			this.totalPrice = totalPrice;
 		}
-        
-}
+
+      
+    }
 
 	public Long getCartId() {
 		return cartId;
@@ -79,8 +80,7 @@ public class ClearCartResponse {
 	public void setTotalAmount(Double totalAmount) {
 		this.totalAmount = totalAmount;
 	}
-    
-    
+
     
     
 }

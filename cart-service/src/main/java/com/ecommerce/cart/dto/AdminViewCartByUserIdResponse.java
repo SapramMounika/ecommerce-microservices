@@ -2,14 +2,13 @@ package com.ecommerce.cart.dto;
 
 import java.util.List;
 
-public class AdminViewCartResponse {
-
-	
-	 private Long cartId;
-	    private Long userId;
+public class AdminViewCartByUserIdResponse {
+	  private Long userId;
+	    private Long cartId;
 	    private List<Item> items;
+	    private Integer totalItems;
 	    private Double totalAmount;
-
+	    
 	    public static class Item {
 	        private Long cartItemId;
 	        private Long productId;
@@ -49,42 +48,37 @@ public class AdminViewCartResponse {
 	        
 	        
 	        
-	        
-	        
 }
-
-		public Long getCartId() {
-			return cartId;
-		}
-
-		public void setCartId(Long cartId) {
-			this.cartId = cartId;
-		}
-
 		public Long getUserId() {
 			return userId;
 		}
-
 		public void setUserId(Long userId) {
 			this.userId = userId;
 		}
-
+		public Long getCartId() {
+			return cartId;
+		}
+		public void setCartId(Long cartId) {
+			this.cartId = cartId;
+		}
 		public List<Item> getItems() {
 			return items;
 		}
-
 		public void setItems(List<Item> items) {
 			this.items = items;
 		}
-
+		public Integer getTotalItems() {
+			return totalItems;
+		}
+		public void setTotalItems(Integer totalItems) {
+			this.totalItems = totalItems;
+		}
 		public Double getTotalAmount() {
 			return totalAmount;
 		}
-
 		public void setTotalAmount(Double totalAmount) {
 			this.totalAmount = totalAmount;
 		}
-	    
-	    
+		
 	    
 }

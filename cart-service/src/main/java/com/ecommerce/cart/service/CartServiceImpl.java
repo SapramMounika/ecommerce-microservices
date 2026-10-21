@@ -1,19 +1,25 @@
+
 package com.ecommerce.cart.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
 import jakarta.transaction.Transactional;
+
 import com.ecommerce.cart.client.ProductClient;
 import com.ecommerce.cart.dto.*;
 import com.ecommerce.cart.entity.Cart;
 import com.ecommerce.cart.entity.CartItem;
-import com.ecommerce.cart.exception.*;
+import com.ecommerce.cart.exception.CartEmptyException;
+import com.ecommerce.cart.exception.CartItemAlreadyExistsException;
+import com.ecommerce.cart.exception.CartItemNotFoundException;
+import com.ecommerce.cart.exception.CartNotFoundException;
 import com.ecommerce.cart.repository.CartRepository;
 import com.ecommerce.cart.response.ApiResponse;
-import com.ecommerce.cart.response.ApiResponseBuilder;
 
 @Service
 @Transactional
@@ -21,19 +27,22 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final ProductClient productClient;
-    
-    public CartServiceImpl(CartRepository cartRepository,
+
+    public CartServiceImpl(
+            CartRepository cartRepository,
             ProductClient productClient) {
-this.cartRepository = cartRepository;
-this.productClient = productClient;
-}
-    
-    // 1️ ADD ITEM TO CART
-    
+        this.cartRepository = cartRepository;
+        this.productClient = productClient;
+    }
+
+    // =====================================================
+    // USER 1: ADD ITEM TO CART
+    // =====================================================
+
     @Override
-    public ApiResponse<AddToCartResponse> addItemToCart(Long userId, AddToCartRequest request) {
-    	System.out.println("ADD TO CART USER ID: " + userId);
-        // 1. Fetch existing cart OR create new cart for user
+    public ApiResponse<AddToCartResponse> addItemToCart(
+            Long userId, AddToCartRequest request) {
+
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
@@ -41,335 +50,383 @@ this.productClient = productClient;
                     return newCart;
                 });
 
-        // 2. Validate: prevent duplicate product in cart
-        boolean exists = cart.getItems().stream()
-                .anyMatch(item -> item.getProductId().equals(request.getProductId()));
+        boolean alreadyExists = cart.getItems().stream()
+                .anyMatch(item ->
+                        item.getProductId().equals(request.getProductId()));
 
-        if (exists) {
-            throw new CartItemAlreadyExistsException("Product already exists in cart");
+        if (alreadyExists) {
+            throw new CartItemAlreadyExistsException(
+                    "Product already exists in cart. Update its quantity.");
         }
 
-        // 3. Create new CartItem
+        // Fetch product information from Product Service.
+        var productResult =
+                productClient.getProductById(request.getProductId());
+
+        if (productResult == null || productResult.getData() == null) {
+            throw new IllegalStateException(
+                    "Product details could not be retrieved.");
+        }
+
+        ProductResponse product = productResult.getData();
+
+        if (product.getPrice() == null || product.getPrice() < 0) {
+            throw new IllegalStateException("Invalid product price.");
+        }
+
         CartItem item = new CartItem();
-        item.setProductId(request.getProductId());
+        item.setProductId(product.getProductId());
         item.setQuantity(request.getQuantity());
-
-        //  NOTE: In real-world, fetch price from Product Service
-        ProductResponse product =
-                productClient.getProductById(request.getProductId()).getData();
-
         item.setPrice(product.getPrice());
-
-        item.setPrice(product.getPrice());
-
         item.setCart(cart);
 
-        // 4. Add item to cart
         cart.getItems().add(item);
 
-        // 5. Save cart (cascade will save CartItem)
         Cart savedCart = cartRepository.save(cart);
 
-        // 6. Build response DTO
         AddToCartResponse response = new AddToCartResponse();
         response.setCartId(savedCart.getId());
         response.setUserId(savedCart.getUserId());
+        response.setItems(savedCart.getItems().stream()
+                .map(this::toAddToCartItem)
+                .toList());
+        response.setTotalAmount(calculateTotal(savedCart));
 
-        List<AddToCartResponse.Item> items = savedCart.getItems().stream().map(i -> {
-            AddToCartResponse.Item dto = new AddToCartResponse.Item();
-            dto.setCartItemId(i.getId());
-            dto.setProductId(i.getProductId());
-            dto.setQuantity(i.getQuantity());
-            dto.setPrice(i.getPrice());
-            dto.setTotalPrice(i.getPrice() * i.getQuantity());
-            return dto;
-        }).toList();
-
-        response.setItems(items);
-        response.setTotalAmount(items.stream()
-                .mapToDouble(AddToCartResponse.Item::getTotalPrice)
-                .sum());
-
-        // 7. Return API response
-        return new ApiResponse<>(
-                true,
-                "Item successfully added to cart",
-                response,
-                200,
-                LocalDateTime.now()
-        );
+        return success("Item added to cart successfully", response);
     }
 
-    
-    // 2️ UPDATE CART ITEM (INCREMENT / DECREMENT)
-    
+    // =====================================================
+    // USER 2: UPDATE ITEM QUANTITY
+    // =====================================================
+
     @Override
-    public ApiResponse<UpdateCartItemResponse> updateCartItem(Long userId, UpdateCartItemRequest request) {
+    public ApiResponse<UpdateCartItemResponse> updateCartItem(
+            Long userId, UpdateCartItemRequest request) {
 
-        // 1. Fetch cart
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        Cart cart = getCartByUserId(userId);
 
-        // 2. Find item in cart
         CartItem item = cart.getItems().stream()
-                .filter(i -> i.getProductId().equals(request.getProductId()))
+                .filter(i ->
+                        i.getProductId().equals(request.getProductId()))
                 .findFirst()
-                .orElseThrow(() -> new CartItemNotFoundException("Item not found in cart"));
+                .orElseThrow(() ->
+                        new CartItemNotFoundException(
+                                "Product not found in cart."));
 
-        // 3. Update quantity
-        int newQty = item.getQuantity() + request.getQuantity();
+        // Set the new quantity supplied in the request.
+        item.setQuantity(request.getQuantity());
 
-        if (newQty <= 0) {
-            throw new RuntimeException("Quantity cannot be zero or negative");
-        }
-
-        item.setQuantity(newQty);
-
-        // 4. Save cart
         Cart savedCart = cartRepository.save(cart);
 
-        // 5. Build response
         UpdateCartItemResponse response = new UpdateCartItemResponse();
         response.setCartId(savedCart.getId());
         response.setUserId(savedCart.getUserId());
 
-        List<UpdateCartItemResponse.Item> items = savedCart.getItems().stream().map(i -> {
-            UpdateCartItemResponse.Item dto = new UpdateCartItemResponse.Item();
-            dto.setCartItemId(i.getId());
-            dto.setProductId(i.getProductId());
-            dto.setQuantity(i.getQuantity());
-            dto.setPrice(i.getPrice());
-            dto.setTotalPrice(i.getPrice() * i.getQuantity());
-            return dto;
-        }).toList();
+        List<UpdateCartItemResponse.Item> items =
+                savedCart.getItems().stream()
+                .map(i -> {
+                    UpdateCartItemResponse.Item dto =
+                            new UpdateCartItemResponse.Item();
+                    dto.setCartItemId(i.getId());
+                    dto.setProductId(i.getProductId());
+                    dto.setQuantity(i.getQuantity());
+                    dto.setPrice(i.getPrice());
+                    dto.setTotalPrice(i.getPrice() * i.getQuantity());
+                    return dto;
+                })
+                .toList();
 
         response.setItems(items);
-        response.setTotalAmount(items.stream()
-                .mapToDouble(UpdateCartItemResponse.Item::getTotalPrice)
-                .sum());
+        response.setTotalAmount(calculateTotal(savedCart));
 
-        
-        
-        return new ApiResponse<>(
-                true,
-                "Cart item quantity updated successfully",
-                response,
-                200,
-                LocalDateTime.now()
-        );
+        return success("Cart item quantity updated successfully", response);
     }
 
-  
-    // 3️ REMOVE ITEM FROM CART
-    
+    // =====================================================
+    // USER 3: REMOVE ITEM FROM CART
+    // =====================================================
+
     @Override
-    public ApiResponse<RemoveCartItemResponse> removeCartItem(Long userId, RemoveCartItemRequest request) {
+    public ApiResponse<RemoveCartItemResponse> removeCartItem(
+            Long userId, RemoveCartItemRequest request) {
 
-        // 1. Fetch cart
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        Cart cart = getCartByUserId(userId);
 
-        // 2. Find item
         CartItem item = cart.getItems().stream()
-                .filter(i -> i.getProductId().equals(request.getProductId()))
+                .filter(i ->
+                        i.getProductId().equals(request.getProductId()))
                 .findFirst()
-                .orElseThrow(() -> new CartItemNotFoundException("Item not found"));
+                .orElseThrow(() ->
+                        new CartItemNotFoundException(
+                                "Product not found in cart."));
 
-        // 3. Remove item
         cart.getItems().remove(item);
 
-        // 4. Save
+        // orphanRemoval=true on Cart.items removes the deleted item.
         Cart savedCart = cartRepository.save(cart);
 
-        // 5. Build response
         RemoveCartItemResponse response = new RemoveCartItemResponse();
         response.setCartId(savedCart.getId());
         response.setUserId(savedCart.getUserId());
 
-        List<RemoveCartItemResponse.Item> items = savedCart.getItems().stream().map(i -> {
-            RemoveCartItemResponse.Item dto = new RemoveCartItemResponse.Item();
-            dto.setCartItemId(i.getId());
-            dto.setProductId(i.getProductId());
-            dto.setQuantity(i.getQuantity());
-            dto.setPrice(i.getPrice());
-            dto.setTotalPrice(i.getPrice() * i.getQuantity());
-            return dto;
-        }).toList();
+        List<RemoveCartItemResponse.Item> items =
+                savedCart.getItems().stream()
+                .map(i -> {
+                    RemoveCartItemResponse.Item dto =
+                            new RemoveCartItemResponse.Item();
+                    dto.setCartItemId(i.getId());
+                    dto.setProductId(i.getProductId());
+                    dto.setQuantity(i.getQuantity());
+                    dto.setPrice(i.getPrice());
+                    dto.setTotalPrice(i.getPrice() * i.getQuantity());
+                    return dto;
+                })
+                .toList();
 
         response.setItems(items);
-        response.setTotalAmount(items.stream()
-                .mapToDouble(RemoveCartItemResponse.Item::getTotalPrice)
-                .sum());
+        response.setTotalAmount(calculateTotal(savedCart));
 
-        return new ApiResponse<>(
-                true,
-                "Item successfully removed from cart",
-                response,
-                200,
-                LocalDateTime.now()
-        );
+        return success("Cart item removed successfully", response);
     }
 
-    
-    // 4️ VIEW CART
-    
-    @Override
-    public ApiResponse<ViewCartResponse> viewCart(Long userId) {
-    	System.out.println("VIEW CART USER ID: " + userId);
-        // 1. Fetch cart
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+    // =====================================================
+    // USER 4: VIEW MY CART
+    // =====================================================
 
-        // 2. Build response
-        ViewCartResponse response = new ViewCartResponse();
+    @Override
+    public ApiResponse<ViewMyCart> viewCart(Long userId) {
+
+        Cart cart = getCartByUserId(userId);
+
+        ViewMyCart response = new ViewMyCart();
         response.setCartId(cart.getId());
         response.setUserId(cart.getUserId());
 
-        List<ViewCartResponse.Item> items = cart.getItems().stream().map(i -> {
-            ViewCartResponse.Item dto = new ViewCartResponse.Item();
-            dto.setCartItemId(i.getId());
-            dto.setProductId(i.getProductId());
-            dto.setQuantity(i.getQuantity());
-            dto.setPrice(i.getPrice());
-            dto.setTotalPrice(i.getPrice() * i.getQuantity());
-            return dto;
-        }).toList();
+        List<ViewMyCart.Item> items = cart.getItems().stream()
+                .map(i -> {
+                    ViewMyCart.Item dto = new ViewMyCart.Item();
+                    dto.setCartItemId(i.getId());
+                    dto.setProductId(i.getProductId());
+                    dto.setQuantity(i.getQuantity());
+                    dto.setPrice(i.getPrice());
+                    dto.setTotalPrice(i.getPrice() * i.getQuantity());
+                    return dto;
+                })
+                .toList();
 
         response.setItems(items);
-        response.setTotalAmount(items.stream()
-                .mapToDouble(ViewCartResponse.Item::getTotalPrice)
-                .sum());
+        response.setTotalAmount(calculateTotal(cart));
 
-        System.out.println("CART ITEMS COUNT: " + cart.getItems().size());
-        
-        
-        return new ApiResponse<>(
-                true,
-                "Cart fetched successfully",
-                response,
-                200,
-                LocalDateTime.now()
-        );
+        return success("Cart retrieved successfully", response);
     }
 
-    
-    // 5️ CLEAR CART
-   
+    // =====================================================
+    // USER 5: CLEAR MY CART
+    // =====================================================
+
     @Override
-    public ApiResponse<ClearCartResponse> clearCart(Long userId) {
+    public ApiResponse<ClearMyCart> clearCart(Long userId) {
 
-        // 1. Fetch cart
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        Cart cart = getCartByUserId(userId);
 
-        // 2. Validate cart is not empty
-        if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new CartEmptyException("Cart is already empty");
+        if (cart.getItems().isEmpty()) {
+            throw new CartEmptyException("Cart is already empty.");
         }
 
-        // 3. Clear items
         cart.getItems().clear();
-
-        // 4. Save cart
         Cart savedCart = cartRepository.save(cart);
 
-        // 5. Build response
-        ClearCartResponse response = new ClearCartResponse();
+        ClearMyCart response = new ClearMyCart();
         response.setCartId(savedCart.getId());
         response.setUserId(savedCart.getUserId());
         response.setItems(List.of());
         response.setTotalAmount(0.0);
 
-        
-        System.out.println("CLEAR CART CALLED FOR USER: " + userId);
-        
-        return new ApiResponse<>(
-                true,
-                "Cart cleared successfully",
-                response,
-                200,
-                LocalDateTime.now()
-        );
+        return success("Cart cleared successfully", response);
     }
 
+    // =====================================================
+    // ADMIN 1: VIEW ALL CARTS (PAGINATED)
+    // =====================================================
 
-    // 6️ ADMIN - VIEW ANY USER CART
-    
     @Override
-    public ApiResponse<AdminViewCartResponse> getCartByUserId(AdminViewCartRequest request) {
+    public ApiResponse<AdminViewAllCartsResponse> getCartByUserId(
+            AdminViewAllCartsRequest request) {
 
-        Cart cart = cartRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        Page<Cart> cartPage = cartRepository.findAll(
+                PageRequest.of(request.getPage(), request.getSize()));
 
-        AdminViewCartResponse response = new AdminViewCartResponse();
-        response.setCartId(cart.getId());
-        response.setUserId(cart.getUserId());
+        List<AdminViewAllCartsResponse.CartDetails> carts =
+                cartPage.getContent().stream()
+                .map(cart -> {
+                    AdminViewAllCartsResponse.CartDetails dto =
+                            new AdminViewAllCartsResponse.CartDetails();
 
-        List<AdminViewCartResponse.Item> items = cart.getItems().stream().map(i -> {
-            AdminViewCartResponse.Item dto = new AdminViewCartResponse.Item();
-            dto.setCartItemId(i.getId());
-            dto.setProductId(i.getProductId());
-            dto.setQuantity(i.getQuantity());
-            dto.setPrice(i.getPrice());
-            dto.setTotalPrice(i.getPrice() * i.getQuantity());
-            return dto;
-        }).toList();
+                    dto.setCartId(cart.getId());
+                    dto.setUserId(cart.getUserId());
+                    dto.setItems(cart.getItems().stream()
+                            .map(this::toAddToCartItem)
+                            .toList());
 
-        response.setItems(items);
-        response.setTotalAmount(items.stream()
-                .mapToDouble(AdminViewCartResponse.Item::getTotalPrice)
-                .sum());
+                    dto.setTotalItems(cart.getItems().stream()
+                            .mapToInt(CartItem::getQuantity)
+                            .sum());
 
+                    dto.setTotalAmount(calculateTotal(cart));
+                    return dto;
+                })
+                .toList();
+
+        AdminViewAllCartsResponse response =
+                new AdminViewAllCartsResponse();
+
+        response.setCarts(carts);
+        response.setPage(cartPage.getNumber());
+        response.setSize(cartPage.getSize());
+        response.setTotalElements(cartPage.getTotalElements());
+        response.setTotalPages(cartPage.getTotalPages());
         
-        
-        return new ApiResponse<>(
-                true,
-                "Admin successfully fetched user cart",
-                response,
-                200,
-                LocalDateTime.now()
-        );
+
+        return success("All carts retrieved successfully", response);
     }
 
-    
-    // 7️ ADMIN - CLEAR ANY USER CART
-    
+    // =====================================================
+    // ADMIN 2: CLEAR A USER'S CART
+    // =====================================================
+
     @Override
-    public ApiResponse<AdminClearCartResponse> clearCartByUserId(AdminClearCartRequest request) {
+    public ApiResponse<AdminClearCartResponse> clearCartByUserId(
+            AdminClearCartRequest request) {
 
-        // 1. Fetch cart
-        Cart cart = cartRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+        Cart cart = getCartByUserId(request.getUserId());
 
-        // 2. Check if empty
         if (cart.getItems().isEmpty()) {
-            throw new CartEmptyException("Cart is already empty");
+            throw new CartEmptyException("Cart is already empty.");
         }
 
-        // 3. Clear items
         cart.getItems().clear();
-
-        // 4. Save cart
         Cart savedCart = cartRepository.save(cart);
 
-        // 5. Build response
         AdminClearCartResponse response = new AdminClearCartResponse();
         response.setCartId(savedCart.getId());
         response.setUserId(savedCart.getUserId());
-        response.setItems(List.of());
-        response.setTotalAmount(0.0);
+        response.setMessage("User cart cleared successfully");
 
-        // 6. Return
-       
+        return success("Admin cleared the user's cart successfully", response);
+    }
+
+    // =====================================================
+    // ADMIN 3: VIEW CART BY USER ID
+    // =====================================================
+
+    @Override
+    public ApiResponse<AdminViewCartByUserIdResponse> getCartByUserId(
+            AdminViewCartByUserIdRequest request) {
+
+        Cart cart = getCartByUserId(request.getUserId());
+
+        AdminViewCartByUserIdResponse response =
+                new AdminViewCartByUserIdResponse();
+
+        response.setUserId(cart.getUserId());
+        response.setCartId(cart.getId());
+
+        List<AdminViewCartByUserIdResponse.Item> items =
+                cart.getItems().stream()
+                .map(i -> {
+                    AdminViewCartByUserIdResponse.Item dto =
+                            new AdminViewCartByUserIdResponse.Item();
+                    dto.setCartItemId(i.getId());
+                    dto.setProductId(i.getProductId());
+                    dto.setQuantity(i.getQuantity());
+                    dto.setPrice(i.getPrice());
+                    dto.setTotalPrice(i.getPrice() * i.getQuantity());
+                    return dto;
+                })
+                .toList();
+
+        response.setItems(items);
+        response.setTotalItems(cart.getItems().stream()
+                .mapToInt(CartItem::getQuantity).sum());
+        response.setTotalAmount(calculateTotal(cart));
+        
+
+        return success("Cart retrieved by user ID successfully", response);
+    }
+
+    // =====================================================
+    // ADMIN 4: VIEW CART BY CART ID
+    // =====================================================
+
+    @Override
+    public ApiResponse<AdminViewCartByCartIdResponse> getCartByCartId(
+            AdminViewCartByCartIdRequest request) {
+
+        Cart cart = cartRepository.findById(request.getCartId())
+                .orElseThrow(() ->
+                        new CartNotFoundException("Cart not found."));
+
+        AdminViewCartByCartIdResponse response =
+                new AdminViewCartByCartIdResponse();
+
+        response.setCartId(cart.getId());
+        response.setUserId(cart.getUserId());
+
+        List<AdminViewCartByCartIdResponse.Item> items =
+                cart.getItems().stream()
+                .map(i -> {
+                    AdminViewCartByCartIdResponse.Item dto =
+                            new AdminViewCartByCartIdResponse.Item();
+                    dto.setCartItemId(i.getId());
+                    dto.setProductId(i.getProductId());
+                    dto.setQuantity(i.getQuantity());
+                    dto.setPrice(i.getPrice());
+                    dto.setTotalPrice(i.getPrice() * i.getQuantity());
+                    return dto;
+                })
+                .toList();
+
+        response.setItems(items);
+        response.setTotalItems(cart.getItems().stream()
+                .mapToInt(CartItem::getQuantity).sum());
+        response.setTotalAmount(calculateTotal(cart));
+        
+
+        return success("Cart retrieved by cart ID successfully", response);
+    }
+
+    // =====================================================
+    // PRIVATE HELPER METHODS
+    // =====================================================
+
+    private Cart getCartByUserId(Long userId) {
+        return cartRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new CartNotFoundException("Cart not found."));
+    }
+
+    private double calculateTotal(Cart cart) {
+        return cart.getItems().stream()
+                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .sum();
+    }
+
+    private AddToCartResponse.Item toAddToCartItem(CartItem item) {
+        AddToCartResponse.Item dto = new AddToCartResponse.Item();
+        dto.setCartItemId(item.getId());
+        dto.setProductId(item.getProductId());
+        dto.setQuantity(item.getQuantity());
+        dto.setPrice(item.getPrice());
+        dto.setTotalPrice(item.getPrice() * item.getQuantity());
+        return dto;
+    }
+
+    private <T> ApiResponse<T> success(String message, T data) {
         return new ApiResponse<>(
                 true,
-                "Admin successfully cleared user cart",
-                response,
+                message,
+                data,
                 200,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
     }
-  
-
-   
 }

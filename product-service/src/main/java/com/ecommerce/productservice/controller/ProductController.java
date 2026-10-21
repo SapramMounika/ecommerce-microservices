@@ -39,7 +39,7 @@ public class ProductController {
     }
 
     // ✅ Get All Products
-    @GetMapping("viewAll")
+    @GetMapping("/viewAll")
     public ResponseEntity<ApiResponse<List<ProductGetResponse>>> getAllProducts() {
 
         ApiResponse<List<ProductGetResponse>> response =
@@ -49,7 +49,7 @@ public class ProductController {
     }
 
     // ✅ Get Product By ID
-    @GetMapping("viewById/{id}")
+    @GetMapping("/viewById/{id}")
     public ResponseEntity<ApiResponse<ProductGetResponse>> getProductById(
             @PathVariable Long id) {
 
@@ -60,7 +60,7 @@ public class ProductController {
     }
 
     // ✅ Update Product
-    @PutMapping("update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse<ProductUpdateResponse>> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest request) {
@@ -72,7 +72,7 @@ public class ProductController {
     }
 
     // ✅ Delete Product
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse<ProductDeleteResponse>> deleteProduct(
             @PathVariable Long id) {
 

@@ -36,8 +36,4 @@ public class ProductResponse {
 		public void setPrice(Double price) {
 			this.price = price;
 		}
-	    
-	    
-	    
-	    
 }
